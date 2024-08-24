@@ -109,16 +109,6 @@ class TestIntegrationGithubOrgClient(TestCase):
     def setUpClass(cls):
         """
         Set up the test class before running any test cases.
-
-        This method is a class method and is called once before
-        any test cases are executed.
-        It is used to configure the necessary environment for the tests.
-
-        Args:
-          cls: The class object representing the test class.
-
-        Returns:
-          None
         """
         pass
         config = {
@@ -136,9 +126,6 @@ class TestIntegrationGithubOrgClient(TestCase):
     def test_public_repos(self):
         """
         Test case for the public_repos method of the GithubOrgClient class.
-
-        Returns:
-          None
         """
 
         test_class = GithubOrgClient("google")
