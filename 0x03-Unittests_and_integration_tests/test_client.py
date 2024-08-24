@@ -6,9 +6,10 @@ Class contains unit tests.
 from unittest import TestCase
 from unittest.mock import PropertyMock, patch
 
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 
 from client import GithubOrgClient
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(TestCase):
@@ -81,6 +82,70 @@ class TestGithubOrgClient(TestCase):
         ]
     )
     def test_has_license(self, repo, license_key, expected):
-        """unit-test for GithubOrgClient.has_license"""
+        """
+        Test the `has_license` method of the GithubOrgClient class.
+
+        Args:
+          repo (str): The name of the repository to check.
+          license_key (str): The license key to search for.
+          expected (bool): The expected result of the `has_license` method.
+
+        Returns:
+          None
+        """
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+params = ("org_payload", "repos_payload", "expected_repos", "apache2_repos")
+
+
+@parameterized_class(params, TEST_PAYLOAD)
+class TestIntegrationGithubOrgClient(TestCase):
+    """
+    This class represents the test cases for the GithubOrgClient integration.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up the test class before running any test cases.
+
+        This method is a class method and is called once before
+        any test cases are executed.
+        It is used to configure the necessary environment for the tests.
+
+        Args:
+          cls: The class object representing the test class.
+
+        Returns:
+          None
+        """
+        pass
+        config = {
+            "return_value.json.side_effect": [
+                cls.org_payload,
+                cls.repos_payload,
+                cls.org_payload,
+                cls.repos_payload,
+            ]
+        }
+        cls.get_patcher = patch("requests.get", **config)
+
+        cls.mock = cls.get_patcher.start()
+
+    def test_public_repos(self):
+        """
+        Test case for the public_repos method of the GithubOrgClient class.
+
+        Returns:
+          None
+        """
+
+        test_class = GithubOrgClient("google")
+
+        self.assertEqual(test_class.org, self.org_payload)
+        self.assertEqual(test_class.repos_payload, self.repos_payload)
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("XLICENSE"), [])
+        self.mock.assert_called()
