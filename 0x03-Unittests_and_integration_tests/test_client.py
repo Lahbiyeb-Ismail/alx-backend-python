@@ -97,10 +97,9 @@ class TestGithubOrgClient(TestCase):
         self.assertEqual(result, expected)
 
 
-params = ("org_payload", "repos_payload", "expected_repos", "apache2_repos")
-
-
-@parameterized_class(params, TEST_PAYLOAD)
+@parameterized_class(
+    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"), TEST_PAYLOAD
+)
 class TestIntegrationGithubOrgClient(TestCase):
     """
     This class represents the test cases for the GithubOrgClient integration.
