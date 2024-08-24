@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Class contains unit tests for the `access_nested_map` function.
+Class contains unit tests.
 """
 
 from unittest import TestCase
@@ -64,6 +64,12 @@ class TestAccessNestedMap(TestCase):
         with self.assertRaises(KeyError) as e:
             access_nested_map(nested_map, keys)
         self.assertEqual(f"KeyError('{keys[-1]}')", repr(e.exception))
+
+
+class TestGetJson(TestCase):
+    """
+    This class contains unit tests for the `get_json` function
+    """
 
     @parameterized.expand(
         [
