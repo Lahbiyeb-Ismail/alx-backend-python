@@ -4,10 +4,11 @@ Class contains unit tests for the `access_nested_map` function.
 """
 
 from unittest import TestCase
+from unittest.mock import patch
 
 from parameterized import parameterized
 
-access_nested_map = __import__("utils").access_nested_map
+from utils import access_nested_map, get_json
 
 
 class TestAccessNestedMap(TestCase):
@@ -63,3 +64,30 @@ class TestAccessNestedMap(TestCase):
         with self.assertRaises(KeyError) as e:
             access_nested_map(nested_map, keys)
         self.assertEqual(f"KeyError('{keys[-1]}')", repr(e.exception))
+
+    @parameterized.expand(
+        [
+            ("http://example.com", {"payload": True}),
+            ("http://holberton.io", {"payload": False}),
+        ]
+    )
+    def test_get_json(self, test_url, test_payload):
+        """
+        Test the get_json function.
+
+        Args:
+          test_url (str): The URL to test.
+          test_payload (dict): The expected payload.
+
+        Returns:
+          None
+        """
+        config = {"return_value.json.return_value": test_payload}
+        patcher = patch("requests.get", **config)
+
+        mock = patcher.start()
+
+        self.assertEqual(get_json(test_url), test_payload)
+        mock.assert_called_once()
+
+        patcher.stop()
