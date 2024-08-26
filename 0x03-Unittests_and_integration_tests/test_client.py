@@ -4,9 +4,10 @@ Class contains unit tests.
 """
 
 from unittest import TestCase
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 from parameterized import parameterized, parameterized_class
+from requests import HTTPError
 
 from client import GithubOrgClient
 from fixtures import TEST_PAYLOAD
@@ -113,21 +114,22 @@ class TestIntegrationGithubOrgClient(TestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """
         Set up the test class before running any test cases.
         """
-        config = {
-            "return_value.json.side_effect": [
-                cls.org_payload,
-                cls.repos_payload,
-                cls.org_payload,
-                cls.repos_payload,
-            ]
+        route_payload = {
+            "https://api.github.com/orgs/google": cls.org_payload,
+            "https://api.github.com/orgs/google/repos": cls.repos_payload,
         }
-        cls.get_patcher = patch("requests.get", **config)
 
-        cls.mock = cls.get_patcher.start()
+        def get_payload(url):
+            if url in route_payload:
+                return Mock(**{"json.return_value": route_payload[url]})
+            return HTTPError
+
+        cls.get_patcher = patch("requests.get", side_effect=get_payload)
+        cls.get_patcher.start()
 
     def test_public_repos(self):
         """
